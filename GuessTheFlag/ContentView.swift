@@ -8,6 +8,8 @@
 import SwiftUI
 
 struct ContentView: View {
+    @State private var animationAmount = [0.0, 0.0, 0.0]
+    @State private var opacities = [ 1.0, 1.0, 1.0 ]
     @State private var showingScore = false
     @State private var scoreTitle = ""
     @State private var countries = ["Estonia", "France", "Germany", "Ireland", "Italy", "Nigeria", "Poland", "Russia", "Spain", "UK", "US"].shuffled()
@@ -37,11 +39,28 @@ struct ContentView: View {
                         }
                 ForEach(0..<3) { number in
                     Button {
-                           flagTapped(number)
-                        } label: {
+                        if number == correctAnswer {
+                        withAnimation {
+                            animationAmount[number] += 360
+                            flagTapped(number)
+                        }
+                        } else {
+                            withAnimation {
+                                
+                                flagTapped(number)
+                            }
+                            //opacities[number] = 0.2
+                        }
+                            askQuestion()
+                            
+                           
+                    } label: {
                             Image(countries[number])
                                 .renderingMode(.original).clipShape(Capsule()).shadow(radius: 5)
                         }
+                    .rotation3DEffect(.degrees(animationAmount[number]), axis: (x: 0, y: 1, z: 0))
+                    .opacity(self.opacities[number])
+                        
                 }
                 
                 }.frame(maxWidth: .infinity)
@@ -56,11 +75,11 @@ struct ContentView: View {
                 Spacer()
             }.padding()
         } // end ZStack
-        .alert(scoreTitle, isPresented: $showingScore) {
-            Button("Continue", action: askQuestion)
-        } message: {
-            Text("Your score is \(userScore)")
-        }
+//        .alert(scoreTitle, isPresented: $showingScore) {
+//            Button("Continue", action: askQuestion)
+//        } message: {
+//            Text("Your score is \(userScore)")
+//        }
         .alert("Game Over", isPresented: $gameOver) {
             Button("New Game?", action: newGame)
         } message: {
