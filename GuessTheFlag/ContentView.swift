@@ -17,6 +17,9 @@ struct ContentView: View {
     @State private var userScore = 0
     @State private var gameRounds = 0
     @State private var gameOver = false
+    @State private var highScore = 0
+    @State private var wrongAnswer = false
+    @State private var tappedAnswer = 0
     
     var body: some View {
         ZStack {
@@ -48,10 +51,13 @@ struct ContentView: View {
                             withAnimation {
                                 
                                 flagTapped(number)
+                                wrongAnswer = true
                             }
                             //opacities[number] = 0.2
                         }
+                        if wrongAnswer == false {
                             askQuestion()
+                        }
                             
                            
                     } label: {
@@ -60,6 +66,7 @@ struct ContentView: View {
                         }
                     .rotation3DEffect(.degrees(animationAmount[number]), axis: (x: 0, y: 1, z: 0))
                     .opacity(self.opacities[number])
+                    
                         
                 }
                 
@@ -73,6 +80,10 @@ struct ContentView: View {
                     .foregroundColor(.white)
                     .font(.title.bold())
                 Spacer()
+                Text("High Score: \(highScore)")
+                    .foregroundColor(.white)
+                    .font(.title.bold())
+                Spacer()
             }.padding()
         } // end ZStack
 //        .alert(scoreTitle, isPresented: $showingScore) {
@@ -81,10 +92,23 @@ struct ContentView: View {
 //            Text("Your score is \(userScore)")
 //        }
         .alert("Game Over", isPresented: $gameOver) {
-            Button("New Game?", action: newGame)
+            
+            Button("New Game?") {
+                if userScore > highScore {
+                    highScore = userScore
+                }
+                newGame()
+            }
         } message: {
             Text("Starting a new game")
             
+        }
+        .alert("Wrong answer", isPresented: $wrongAnswer) {
+            Button(role: .cancel) {
+                askQuestion()
+            } label: {
+                Text("This is flag of \(countries[tappedAnswer]).")
+            }
         }
     } // end body
     
@@ -97,6 +121,8 @@ struct ContentView: View {
             scoreTitle = "Wrong"
             userScore -= 15
             gameRounds += 1
+            wrongAnswer = true
+            tappedAnswer = number
         }
 
         showingScore = true
